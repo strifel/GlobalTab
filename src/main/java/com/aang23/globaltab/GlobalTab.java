@@ -112,7 +112,8 @@ public class GlobalTab {
             UUID uuid = UUID.fromString(in.readUTF());
             String hidden = in.readUTF();
             if (hidden.equals("true")) {
-                GlobalTab.hidden.add(uuid);
+                if (!GlobalTab.hidden.contains(uuid))
+                    GlobalTab.hidden.add(uuid);
             } else {
                 GlobalTab.hidden.remove(uuid);
             }
