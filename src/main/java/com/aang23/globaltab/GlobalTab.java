@@ -8,6 +8,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.LegacyChannelIdentifier;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.player.TabList;
 import com.velocitypowered.api.proxy.player.TabListEntry;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -25,13 +26,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Plugin(id = "globaltab", name = "GlobalTab", version = "1.0", description = "A plugin", authors = { "Aang23" })
@@ -42,6 +37,9 @@ public class GlobalTab {
     public static LuckPermsApi luckpermsapi;
 
     public static Map<String, Double> playerBalances = new HashMap<String, Double>();
+    public static ArrayList<UUID> hidden = new ArrayList<>();
+
+    private static final MinecraftChannelIdentifier CHANNEL = MinecraftChannelIdentifier.create("globaltab", "globaltab");
 
     @Inject
     public GlobalTab(ProxyServer lserver, CommandManager commandManager, EventManager eventManager, Logger llogger,
@@ -70,22 +68,26 @@ public class GlobalTab {
 
     @Subscribe
     public void onLeave(DisconnectEvent event) {
+        removePlayer(event.getPlayer().getUniqueId());
+    }
+
+    private void removePlayer(UUID uuid) {
         if (server.getPlayerCount() > 0) {
             for (int i = 0; i < server.getPlayerCount(); i++) {
                 Player currentPlayerToProcess = (Player) server.getAllPlayers().toArray()[i];
-                currentPlayerToProcess.getTabList().removeEntry(event.getPlayer().getUniqueId());
+                currentPlayerToProcess.getTabList().removeEntry(uuid);
             }
         }
     }
 
     @Subscribe
     public void onProxyInitialize(ProxyInitializeEvent event) {
-        server.getChannelRegistrar().register(new LegacyChannelIdentifier("GlobalTab"));
+        server.getChannelRegistrar().register(new LegacyChannelIdentifier("GlobalTab"), CHANNEL);
     }
 
     @Subscribe
     public void onPluginMessage(PluginMessageEvent event) {
-        if (!event.getIdentifier().equals(new LegacyChannelIdentifier("GlobalTab"))) {
+        if (!event.getIdentifier().equals(new LegacyChannelIdentifier("GlobalTab")) && !event.getIdentifier().equals(CHANNEL)) {
             return;
         }
 
@@ -106,6 +108,14 @@ public class GlobalTab {
                 playerBalances.replace(username, balance);
             else
                 playerBalances.put(username, balance);
+        } else if (subChannel.equals("Hide")) {
+            UUID uuid = UUID.fromString(in.readUTF());
+            String hidden = in.readUTF();
+            if (hidden.equals("true")) {
+                GlobalTab.hidden.add(uuid);
+            } else {
+                GlobalTab.hidden.remove(uuid);
+            }
         }
     }
 

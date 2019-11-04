@@ -1,9 +1,6 @@
 package com.aang23.globaltab;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TimerTask;
-import java.util.UUID;
+import java.util.*;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -32,13 +29,15 @@ public class TimerHandler extends TimerTask {
 						for (int i2 = 0; i2 < server.getPlayerCount(); i2++) {
 							Player currentPlayer = (Player) server.getAllPlayers().toArray()[i2];
 
-							TabListEntry currentEntry = TabListEntry.builder().profile(currentPlayer.getGameProfile())
-									.displayName(TabBuilder.formatPlayerTab(
-											(String) ConfigManager.config.get("player_format"), currentPlayer))
-									.tabList(currentPlayerToProcess.getTabList()).build();
+							if (!GlobalTab.hidden.contains(currentPlayer.getUniqueId())) {
+								TabListEntry currentEntry = TabListEntry.builder().profile(currentPlayer.getGameProfile())
+										.displayName(TabBuilder.formatPlayerTab(
+												(String) ConfigManager.config.get("player_format"), currentPlayer))
+										.tabList(currentPlayerToProcess.getTabList()).build();
 
-							GlobalTab.insertIntoTabListCleanly(currentPlayerToProcess.getTabList(), currentEntry,
-									toKeep);
+								GlobalTab.insertIntoTabListCleanly(currentPlayerToProcess.getTabList(), currentEntry,
+										toKeep);
+							}
 						}
 
 						if (ConfigManager.customTabsEnabled()) {
