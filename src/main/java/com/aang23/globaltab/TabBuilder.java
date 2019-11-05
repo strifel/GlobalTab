@@ -10,7 +10,9 @@ public class TabBuilder {
     public static TextComponent formatPlayerTab(String raw, Player player) {
 
         raw = raw.replace("%username%", player.getUsername());
-        raw = raw.replace("%prefix%", UserInfoGetter.getPrefixFromUsername(player.getUsername()));
+        String prefix = UserInfoGetter.getPrefixFromUsername(player.getUsername());
+        raw = raw.replace("%prefix%", prefix);
+        raw = raw.replace("%prefixspace%", prefix.matches("^(&.)*$") ? "" : " ");
         raw = raw.replace("%suffix%", UserInfoGetter.getSuffixFromUsername(player.getUsername()));
         raw = raw.replace("%server%", getCurrentServer(player));
 

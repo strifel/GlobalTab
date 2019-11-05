@@ -54,7 +54,7 @@ public class ConfigManager {
         configfile.put("header", "&4Welcome, &6%username%&4 on");
         configfile.put("footer", "&7the server !");
         configfile.put("updatedelay", "1");
-        configfile.put("player_format", "%prefix% %username%");
+        configfile.put("player_format", "%prefix%%prefixspace%%username%");
         configfile.put("customtabsenabled", true);
 
         customTabs.clear();
